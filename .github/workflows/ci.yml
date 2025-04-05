@@ -16,22 +16,26 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '8.0.x'  
+        dotnet-version: '8.0.x'
 
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore provaTemplete.sln
+      working-directory: ./src
 
     - name: Build
-      run: dotnet build --no-restore --configuration Release
+      run: dotnet build provaTemplete.sln --no-restore --configuration Release
+      working-directory: ./src
 
     - name: Test
-      run: dotnet test --no-build --configuration Release --verbosity normal
+      run: dotnet test provaTemplete.sln --no-build --configuration Release --verbosity normal
+      working-directory: ./src
 
     - name: Publish
-      run: dotnet publish --configuration Release --output ./publish
+      run: dotnet publish provaTemplete.sln --configuration Release --output ./publish
+      working-directory: ./src
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v4 
+      uses: actions/upload-artifact@v4
       with:
         name: pokemon-app
-        path: ./publish
+        path: ./src/publish
