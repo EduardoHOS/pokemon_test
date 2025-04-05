@@ -20,22 +20,18 @@ jobs:
 
     - name: Restore dependencies
       run: dotnet restore provaTemplete.sln
-      working-directory: ./src
 
     - name: Build
       run: dotnet build provaTemplete.sln --no-restore --configuration Release
-      working-directory: ./src
 
     - name: Test
       run: dotnet test provaTemplete.sln --no-build --configuration Release --verbosity normal
-      working-directory: ./src
 
     - name: Publish
       run: dotnet publish provaTemplete.sln --configuration Release --output ./publish
-      working-directory: ./src
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: pokemon-app
-        path: ./src/publish
+        path: ./publish
