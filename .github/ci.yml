@@ -19,19 +19,19 @@ jobs:
         dotnet-version: '8.0.x'  
 
     - name: Restore dependencies
-      run: dotnet restore src/pokemon_test.sln
+      run: dotnet restore
 
     - name: Build
-      run: dotnet build src/pokemon_test.sln --no-restore --configuration Release
+      run: dotnet build --no-restore --configuration Release
 
     - name: Test
-      run: dotnet test src/pokemon_test.sln --no-build --configuration Release --verbosity normal
+      run: dotnet test --no-build --configuration Release --verbosity normal
 
     - name: Publish
-      run: dotnet publish src/pokemon_test.sln --configuration Release --output ./publish
+      run: dotnet publish --configuration Release --output ./publish
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4 
       with:
         name: pokemon-app
         path: ./publish
