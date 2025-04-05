@@ -1,0 +1,294 @@
+﻿@page "/"
+@using provaTemplete.Models
+@using provaTemplete.Services
+@inject IPokemonService PokemonService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Pokedex App - Home</PageTitle>
+
+<div class="pokemon-banner">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="display-4 text-white fw-bold">Bem-vindo ao curriculo Pokedex</h1>
+                <p class="lead text-white">Explore, descubra o curriculo de Pokémons, tendo destaque para o mais diferenciado, eu ! Edu.</p>
+                <button class="btn btn-warning btn-lg" @onclick="GoToPokemonCatalog">
+                    Ver curriculo de pokemons
+                </button>
+            </div>
+            <div class="col-md-6 text-center d-none d-md-block">
+                <img src="https://assets.pokemon.com/assets/cms2/img/pokedex/full/025.png" alt="Pikachu" class="img-fluid animated-pokemon" style="max-height: 300px;">
+            </div>
+            <div class="col-md-6 text-center d-none d-md-block">
+                <img src="https://res.cloudinary.com/dmornatkl/image/upload/v1743771846/a76698dc-cb0c-427c-bb1d-506ab6d9468c.png" alt="Eduh" class="img-fluid animated-pokemon" style="max-height: 300px;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <!-- Estatísticas -->
+    <div class="row mb-5">
+        <h2 class="text-center mb-4">Estatísticas da Pokedex</h2>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card text-center border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="stat-icon mb-3">
+                        <i class="bi bi-collection" style="font-size: 2rem; color: #FF5722;"></i>
+                    </div>
+                    <h3 class="counter">@pokemonCount</h3>
+                    <p class="text-muted">Pokémon Total</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card text-center border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="stat-icon mb-3">
+                        <i class="bi bi-fire" style="font-size: 2rem; color: #F44336;"></i>
+                    </div>
+                    <h3 class="counter">@FireTypeCount</h3>
+                    <p class="text-muted">Tipo Fogo</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card text-center border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="stat-icon mb-3">
+                        <i class="bi bi-droplet" style="font-size: 2rem; color: #2196F3;"></i>
+                    </div>
+                    <h3 class="counter">@WaterTypeCount</h3>
+                    <p class="text-muted">Tipo Água</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card text-center border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="stat-icon mb-3">
+                        <i class="bi bi-lightning" style="font-size: 2rem; color: #FFC107;"></i>
+                    </div>
+                    <h3 class="counter">@ElectricTypeCount</h3>
+                    <p class="text-muted">Tipo Elétrico</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pokémon em destaque -->
+    <div class="row mb-5">
+        <h2 class="text-center mb-4">Pokémons legais</h2>
+        
+        @if (featuredPokemons.Any())
+        {
+            @foreach (var pokemon in featuredPokemons)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="text-center pt-3">
+                            <img src="@pokemon.ImageUrl" class="card-img-top" alt="@pokemon.Name" style="height: 150px; object-fit: contain;">
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title text-center">@pokemon.Name</h5>
+                            <p class="card-text text-center">Tipo: @pokemon.Type</p>
+                            <div class="progress mb-2">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: @GetStatPercentage(pokemon.HP, 150)%" aria-valuenow="@pokemon.HP" aria-valuemin="0" aria-valuemax="150">HP: @pokemon.HP</div>
+                            </div>
+                            <div class="progress mb-2">
+                                <div class="progress-bar bg-danger" role="progressbar" style="width: @GetStatPercentage(pokemon.Attack, 150)%" aria-valuenow="@pokemon.Attack" aria-valuemin="0" aria-valuemax="150">ATK: @pokemon.Attack</div>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-info" role="progressbar" style="width: @GetStatPercentage(pokemon.Defense, 150)%" aria-valuenow="@pokemon.Defense" aria-valuemin="0" aria-valuemax="150">DEF: @pokemon.Defense</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center">
+                <p>Carregando Pokémon em destaque...</p>
+            </div>
+        }
+    </div>
+
+    <!-- Sobre -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h1 class="text-center mb-4">Currículo</h1>
+
+                    <button class="btn btn-warning btn-lg" @onclick="GoToPokemonCatalog">
+                        <a href=“https://www.linkedin.com/in/eduardo-hos/”>LinkIn</a>
+                    </button>
+                    <button class="btn btn-warning btn-lg" @onclick="GoToPokemonCatalog">
+                        <a href=“https://github.com/EduardoHOS”>GitHub</a>
+                    </button>
+
+
+
+                    <h2>Pokemon em Destaque: Eduardo Henrique Oliveira Santos</h2>
+                    <p>
+                        Tem como objetivo ingressar em gestão de projetos de tecnologia com metodologias ágeis no duolingo. Vim da cidade com maior concentração demográfica na América Latina. Sou filho de pais nordestinos e sou da primeira geração da minha família a fazer curso superior.
+                    </p>
+					<br />
+                    <h3 >Habilidades e experiências por projeto</h3>
+                    <h4 >Uber (04/2024 - 06/2024) </h4>
+                    <p>
+                        • Tecnologias: Docker | Python | Machine Learning | Slack API
+                    </p>
+                    <p>
+                        Desenvolveu um sistema de NLP para analisar emoções no Twitter e enviar alertas no Slack.
+                    </p>
+
+                    <h4 >BCGx (08/2023 - 10/2023) </h4>
+                    <p>
+                        • Tecnologias: Machine Learning | Next.js
+                    </p>
+                    <p>
+                        Construiu um modelo de machine learning para prever a taxa de saída dos clientes da empresa.
+                    </p>
+
+                    <h4 >Skills</h4>
+                    <p>
+                        Python | SQL | .NET | Solidity | JavaScript | HTML | CSS | AWS | Docker | Git | Data Analysis | SAP |  Digital Manufacturing | SQS | AWS
+                    </p>
+                    
+
+                    <h4>Idiomas</h4>
+                    <p>
+                        Proficiência em Inglês (nível  C1), Francês básico (A2).
+                    </p>
+
+                    <h4>Habilidades do Eduh</h4>
+                    <p>
+                        Tipo: Psychic/grass
+                    </p>
+                    <p>
+                        Nível:100
+                    </p>
+                    <p>
+                        HP:113
+                    </p>
+                    <p>
+                        Ataque: 200
+                    </p>
+                    <p>
+                        Defesa: 100
+                    </p>
+
+
+                  
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos CSS personalizados -->
+<style>
+    .pokemon-banner {
+        background: linear-gradient(135deg, #3B4CCA 0%, #FF0000 100%);
+        border-radius: 0 0 30px 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        margin-bottom: 2rem;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .pokemon-banner::before {
+        content: "";
+        position: absolute;
+        background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='40' fill='white' fill-opacity='0.1'/%3E%3C/svg%3E");
+        width: 100%;
+        height: 100%;
+        opacity: 0.3;
+    }
+
+    .animated-pokemon {
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @@keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-15px); }
+        100% { transform: translateY(0px); }
+    }
+
+    .counter {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .stat-icon {
+        background-color: rgba(0, 0, 0, 0.05);
+        width: 70px;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        margin: 0 auto;
+    }
+</style>
+
+@code {
+    private List<Pokemon> allPokemons = new List<Pokemon>();
+    private List<Pokemon> featuredPokemons = new List<Pokemon>();
+    private int pokemonCount = 0;
+    private int FireTypeCount = 0;
+    private int WaterTypeCount = 0;
+    private int ElectricTypeCount = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            allPokemons = (await PokemonService.GetAllPokemonsAsync()).ToList();
+            
+            // Contar os tipos de Pokémon
+            pokemonCount = allPokemons.Count;
+            FireTypeCount = CountPokemonByType("Fire");
+            WaterTypeCount = CountPokemonByType("Water");
+            ElectricTypeCount = CountPokemonByType("Electric");
+            
+            // Selecionar Pokémon em destaque (os 3 com maior nível)
+            featuredPokemons = allPokemons
+                .OrderByDescending(p => p.Level)
+                .Take(3)
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao carregar dados: {ex.Message}");
+        }
+    }
+
+    private int CountPokemonByType(string type)
+    {
+        return allPokemons.Count(p => p.Type.Contains(type, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private string GetStatPercentage(int stat, int maxStat)
+    {
+        return Math.Min(100, (stat * 100) / maxStat).ToString();
+    }
+
+    private void GoToPokemonCatalog()
+    {
+        NavigationManager.NavigateTo("/pokemons");
+    }
+}
