@@ -1,0 +1,316 @@
+@page "/pokemons"
+@using provaTemplete.Models
+@using provaTemplete.Services
+@inject IPokemonService PokemonService
+
+<PageTitle>Pokémon Catalog</PageTitle>
+
+<div class="container mt-4">
+    <h1 class="text-center mb-4">Currículo Pokémon</h1>
+
+    <p class="text-center mb-4">Esta página mostra todos os Pokémons que o Eduh tem, mas é apenas para mostrar como eles são legais, e eu também. Use os filtros abaixo para encontrar seu Pokémon favorito!(backlog)</p>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text">Nome</span>
+                <input @bind="searchNameTerm" @bind:event="oninput" class="form-control" placeholder="Buscar por nome..." />
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text">Tipo</span>
+                <input @bind="searchTypeTerm" @bind:event="oninput" class="form-control" placeholder="Buscar por tipo..." />
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <button class="btn btn-primary w-100" @onclick="FilterPokemons">
+                <i class="bi bi-search"></i> Buscar
+            </button>
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-secondary w-100" @onclick="ClearFilter">
+                <i class="bi bi-x-circle"></i> Limpar Filtros
+            </button>
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-success w-100" @onclick="() => ShowModal(new Pokemon())">
+                <i class="bi bi-plus-circle"></i> Adicionar Pokémon
+            </button>
+        </div>
+    </div>
+
+    @if (loading)
+    {
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p class="mt-2">Carregando Pokémon...</p>
+        </div>
+    }
+    else if (!filteredPokemons.Any())
+    {
+        <div class="alert alert-info text-center" role="alert">
+            Nenhum Pokémon encontrado com os filtros selecionados.
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            @foreach (var pokemon in filteredPokemons)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="text-center pt-3 bg-light">
+                            <img src="@pokemon.ImageUrl" class="card-img-top" alt="@pokemon.Name" style="height: 180px; object-fit: contain;">
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title text-center">@pokemon.Name</h5>
+                            <div class="card-text">
+                                <div class="row mb-2">
+                                    <div class="col-6"><strong>Tipo:</strong></div>
+                                    <div class="col-6">@pokemon.Type</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6"><strong>Nível:</strong></div>
+                                    <div class="col-6">@pokemon.Level</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6"><strong>HP:</strong></div>
+                                    <div class="col-6">@pokemon.HP</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6"><strong>Ataque:</strong></div>
+                                    <div class="col-6">@pokemon.Attack</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6"><strong>Defesa:</strong></div>
+                                    <div class="col-6">@pokemon.Defense</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-flex justify-content-between">
+                                <button class="btn btn-primary" @onclick="() => ShowModal(pokemon)">Editar</button>
+                                <button class="btn btn-danger" @onclick="() => ConfirmDelete(pokemon)">Excluir</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@if (showModal)
+{
+    <div class="modal" tabindex="-1" style="display:block" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(currentPokemon.Id == 0 ? "Adicionar" : "Editar") Pokémon</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nome</label>
+                        <input id="name" class="form-control" @bind="currentPokemon.Name" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="type" class="form-label">Tipo</label>
+                        <input id="type" class="form-control" @bind="currentPokemon.Type" />
+                        <small class="text-muted">Exemplo: Fire, Water, Electric, Grass/Poison</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="level" class="form-label">Nível</label>
+                        <input id="level" type="number" class="form-control" @bind="currentPokemon.Level" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="hp" class="form-label">HP</label>
+                        <input id="hp" type="number" class="form-control" @bind="currentPokemon.HP" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="attack" class="form-label">Ataque</label>
+                        <input id="attack" type="number" class="form-control" @bind="currentPokemon.Attack" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="defense" class="form-label">Defesa</label>
+                        <input id="defense" type="number" class="form-control" @bind="currentPokemon.Defense" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="imageUrl" class="form-label">URL da Imagem</label>
+                        <input id="imageUrl" class="form-control" @bind="currentPokemon.ImageUrl" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Fechar</button>
+                    <button type="button" class="btn btn-primary" @onclick="SavePokemon">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@if (showDeleteConfirm)
+{
+    <div class="modal" tabindex="-1" style="display:block" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close" @onclick="() => showDeleteConfirm = false"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja excluir o Pokémon <strong>@pokemonToDelete?.Name</strong>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => showDeleteConfirm = false">Cancelar</button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmDeletePokemon">Excluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    private List<Pokemon> pokemons = new List<Pokemon>();
+    private List<Pokemon> filteredPokemons = new List<Pokemon>();
+    private bool loading = true;
+    private string searchNameTerm = "";
+    private string searchTypeTerm = "";
+    private bool showModal = false;
+    private Pokemon currentPokemon = new Pokemon();
+    private bool showDeleteConfirm = false;
+    private Pokemon pokemonToDelete;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPokemons();
+    }
+
+    private async Task LoadPokemons()
+    {
+        loading = true;
+        try
+        {
+            pokemons = (await PokemonService.GetAllPokemonsAsync()).ToList();
+            filteredPokemons = pokemons;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao carregar os Pokémon: {ex.Message}");
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private void FilterPokemons()
+    {
+        filteredPokemons = pokemons;
+
+        // Filtrar por nome se houver termo de busca
+        if (!string.IsNullOrWhiteSpace(searchNameTerm))
+        {
+            filteredPokemons = filteredPokemons
+                .Where(p => p.Name.Contains(searchNameTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        // Filtrar por tipo se houver termo de busca
+        if (!string.IsNullOrWhiteSpace(searchTypeTerm))
+        {
+            filteredPokemons = filteredPokemons
+                .Where(p => p.Type.Contains(searchTypeTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+    }
+
+    private void ClearFilter()
+    {
+        searchNameTerm = "";
+        searchTypeTerm = "";
+        filteredPokemons = pokemons;
+    }
+
+    private void ShowModal(Pokemon pokemon)
+    {
+        currentPokemon = new Pokemon
+        {
+            Id = pokemon.Id,
+            Name = pokemon.Name,
+            Type = pokemon.Type,
+            Level = pokemon.Level,
+            HP = pokemon.HP,
+            Attack = pokemon.Attack,
+            Defense = pokemon.Defense,
+            ImageUrl = pokemon.ImageUrl
+        };
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+    }
+
+    private async Task SavePokemon()
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(currentPokemon.Name) || 
+                string.IsNullOrWhiteSpace(currentPokemon.Type) ||
+                string.IsNullOrWhiteSpace(currentPokemon.ImageUrl))
+            {
+                // Você pode implementar uma validação mais robusta aqui
+                return;
+            }
+
+            if (currentPokemon.Id == 0)
+            {
+                await PokemonService.AddPokemonAsync(currentPokemon);
+            }
+            else
+            {
+                await PokemonService.UpdatePokemonAsync(currentPokemon);
+            }
+
+            await LoadPokemons();
+            showModal = false;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao salvar o Pokémon: {ex.Message}");
+        }
+    }
+
+    private void ConfirmDelete(Pokemon pokemon)
+    {
+        pokemonToDelete = pokemon;
+        showDeleteConfirm = true;
+    }
+
+    private async Task ConfirmDeletePokemon()
+    {
+        try
+        {
+            if (pokemonToDelete != null)
+            {
+                await PokemonService.DeletePokemonAsync(pokemonToDelete.Id);
+                await LoadPokemons();
+            }
+            showDeleteConfirm = false;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao excluir o Pokémon: {ex.Message}");
+        }
+    }
+}
