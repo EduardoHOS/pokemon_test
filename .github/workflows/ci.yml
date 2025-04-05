@@ -1,4 +1,4 @@
-name: Pokémon App CI
+name: ci
 
 on:
   push:
@@ -31,7 +31,7 @@ jobs:
       run: dotnet publish src/pokemon_test.sln --configuration Release --output ./publish
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: pokemon-app
         path: ./publish
